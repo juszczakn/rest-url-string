@@ -10,6 +10,10 @@ To decode URL's in-buffer, use ```rest-url-string-extract-print``` and ```rest-u
 
 To reencode URL's, use ```rest-url-string-reencode-region-print```.
 
+To make an http get call with the URL on the current line, call ```rest-url-string-http-get```.
+
+If getting json responses back, I suggest looking into the json-reformat package.
+
 Also provides functions for retrieving the base URL and query parameters. 
 
 Install
