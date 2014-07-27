@@ -6,8 +6,7 @@ For easy evaluation and printing of url's using REST
 Use
 ===============
 
-To decode URL's in-buffer, use ```rest-url-string-extract-print``` and
-```rest-url-string-extract-decode-print```.
+To decode URL's in-buffer, use ```rest-url-string-extract-print``` and ```rest-url-string-extract-decode-print```.
 
 To reencode URL's, use ```rest-url-string-reencode-region-print```.
 
