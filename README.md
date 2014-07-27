@@ -1,7 +1,7 @@
 rest-url-string
 ===============
 
-For easy evaluation and printing of url's using REST
+For easy evaluation and printing of URL's using REST
 
 Use
 ===============

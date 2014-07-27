@@ -135,11 +135,6 @@
     (move-beginning-of-line nil) (newline) (previous-line)
     (insert str)))
 
-;; (with-current-buffer (url-retrieve-synchronously "http://stackoverflow.com")
-;;   (prog1
-;;       (buffer-string)
-;;     (kill-buffer)))
-
 (defun rest-url-string-http-get ()
   "Make http get call with current lines URL"
   (interactive)
