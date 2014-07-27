@@ -18,7 +18,6 @@
 ;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ;; THE SOFTWARE.
 
-
 (defconst rest-url-string-decode-strings
   '(("%20" " "))
   "list of encodings and their decoded values")
@@ -48,10 +47,11 @@
 (defun rest-url-string-extract-decode ()
   "extract url and params, decode params"
   (setf url-list (rest-url-string-extract))
-  (setf decoded-params (rest-url-string-params-decode (car (cdr url-list))))
+  (setf decoded-params (rest-url-string-params-decode (second url-list)))
   (list (car url-list) decoded-params))
 
 (defun rest-url-string-extract-print ()
+  "Extract URL and parameters, print them below the URL in the buffer"
   (interactive)
   (move-end-of-line nil)
   (setf elts (rest-url-string-extract))
@@ -63,18 +63,35 @@
   (newline))
 
 (defun rest-url-string-extract-decode-print ()
+  "Extract URL and decode the parameters, print them below the URL in the buffer"
   (interactive)
-  (move-end-of-line nil)
-  (setf elts (rest-url-string-extract-decode))
-  ;; (message "%s" elts))
-  (newline)
-  (insert (car elts))
-  (dolist (elt (car (cdr elts)))
+  (save-excursion
+    (move-end-of-line nil)
+    (setf elts (rest-url-string-extract-decode))
     (newline)
-    (insert elt))
-  (newline))
+    (insert (car elts))
+    (dolist (elt (second elts))
+      (newline)
+      (insert elt))
+    (print return-point)))
+
+(defun rest-url-string-reencode-region (s)
+  "re-encode and create URL that has been extracted"
+  (setq s (replace-regexp-in-string (regexp-quote "\n") "&" s))
+  (setq s (replace-regexp-in-string "\\(&\\).*\\'" "?" s nil nil 1))
+  (replace-regexp-in-string "\\(&\\|\\?\\)$" "" s))
+
+(defun rest-url-string-reencode-region-print (begin end)
+  "reconstruct/reencode a given region that has been split by extract-print"
+  (interactive "r")
+  (save-excursion
+    (setq str (rest-url-string-reencode-region (buffer-substring-no-properties begin end)))
+    (dolist (encode rest-url-string-decode-strings)
+      (setf str (replace-regexp-in-string (regexp-quote (second encode)) (car encode) str)))
+    (move-beginning-of-line nil) (newline) (previous-line)
+    (insert str)))
+
+(provide 'rest-url-string)
 
 ;; Test URL
 ;http://www.acme.com/phonebook/UserDetails?firstName=John&lastName=Doe%20Mark
-
-(provide 'rest-url-string)
