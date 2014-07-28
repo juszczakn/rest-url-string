@@ -1,3 +1,5 @@
+;;; rest-url-string.el --- For easy evaluation and printing of URL's using REST
+
 ;; Copyright (c) 2014 juszczakn
 
 ;; Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,8 +20,11 @@
 ;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ;; THE SOFTWARE.
 
+;; 
 
-;;;; List of all possible encodings
+;;; Code:
+
+; List of all possible encodings
 ;; '(("%09" "\t") ("%0A" "linefeed") ("%0D" "creturn") ("%20" " ")
 ;;   ("%22" "\"") ("%23" "#") ("%24" "$") ("%25" "%") ("%26" "&")
 ;;   ("%27" "'") ("%28" "(") ("%29" ")") ("%2A" "*") ("%2B" "+")
@@ -148,9 +153,8 @@
       (move-end-of-line nil) (newline 2)
       (insert response))))
 
-(provide 'rest-url-string)
-
-;; End of rest-url-string.el
-
 ;; Test URL
 ;http://www.acme.com/phonebook/UserDetails?firstName=John&lastName=Doe%20Mark
+
+(provide 'rest-url-string)
+;;; rest-url-string.el ends here
