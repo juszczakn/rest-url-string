@@ -126,15 +126,15 @@
 (defun rest-url-string-reencode-region (s)
   "re-encode and create URL that has been extracted"
   ;; TODO: make this smarter
-  (setq s (replace-regexp-in-string (regexp-quote "\n") "&" s))
-  (setq s (replace-regexp-in-string "\\(&\\).*\\'" "?" s nil nil 1))
+  (setf s (replace-regexp-in-string (regexp-quote "\n") "&" s))
+  (setf s (replace-regexp-in-string "\\(&\\).*\\'" "?" s nil nil 1))
   (replace-regexp-in-string "\\(&\\|\\?\\)$" "" s))
 
 (defun rest-url-string-reencode-region-print (begin end)
   "reconstruct/reencode a given region that has been split by extract-print"
   (interactive "r")
   (save-excursion
-    (setq str (rest-url-string-reencode-region (buffer-substring-no-properties begin end)))
+    (setf str (rest-url-string-reencode-region (buffer-substring-no-properties begin end)))
     (dolist (encode rest-url-string-decode-strings)
       (setf str (replace-regexp-in-string (regexp-quote (second encode)) (car encode) str)))
     (move-beginning-of-line nil) (newline) (previous-line)
@@ -144,10 +144,10 @@
   "Make http get call with current lines URL"
   (interactive)
   (let ((url (buffer-substring (point-at-bol) (point-at-eol))))
-    (setq response "")
+    (setf response "")
     (with-current-buffer (url-retrieve-synchronously url)
       (progn
-       (setq response (buffer-string))
+       (setf response (buffer-string))
        (kill-buffer)))
     (save-excursion
       (move-end-of-line nil) (newline 2)
