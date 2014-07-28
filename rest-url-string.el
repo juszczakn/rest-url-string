@@ -63,7 +63,11 @@
 ;;   ("%FD" "ý") ("%FE" "þ") ("%FF" "ÿ") ("%21" "!"))
 
 (defconst rest-url-string-decode-strings
-  '(("%20" " "))
+  '(("%20" " ") ("%3A" ":") ("%5B" "[") ("%5C" "\\") ("%5D" "]")
+    ("%3B" ";") ("%3C" "<") ("%3D" "=") ("%3E" ">") ("%3F" "?")
+    ("%2C" ",") ("%28" "(") ("%29" ")") ("%2A" "*") ("%2B" "+")
+    ("%7C" "|") ("%7D" "}") ("%7E" "~") ("%A2" "¢") ("%A3" "£")
+    ("%7B" "{") ("%22" "\"") ("+" " "))
   "list of encodings and their decoded values")
 
 (defun rest-url-string-trim-string (s)
@@ -73,14 +77,18 @@
 (defun rest-url-string-split-params (params)
   (split-string params "&"))
 
-(defun rest-url-string-params-decode (params)
-  "take list of encoded params, return list decoded "
+(defun rest-url-string-params-translate (params decode-p)
+  "take list of params, return list encoded or decoded"
   (setf newparams '())
-  (dolist (param params newparams)
+  ; from <value> to <new value>
+  (setf from (if decode-p #'car #'second))
+  (setf to (if decode-p #'second #'car))
+  (dolist (param params)
     (dolist (decode rest-url-string-decode-strings param)
       ; decode every param
-      (setf param (replace-regexp-in-string (regexp-quote (car decode)) (second decode) param)))
-    (setf newparams (cons param newparams))))
+      (setf param (replace-regexp-in-string (regexp-quote (funcall from decode)) (funcall to decode) param)))
+    (setf newparams (cons param newparams)))
+  (nreverse newparams))
 
 (defun rest-url-string-extract ()
   "extract url and params"
@@ -96,7 +104,7 @@
 (defun rest-url-string-extract-decode ()
   "extract url and params, decode params"
   (setf url-list (rest-url-string-extract))
-  (setf decoded-params (rest-url-string-params-decode (second url-list)))
+  (setf decoded-params (rest-url-string-params-translate (second url-list) t))
   (list (car url-list) decoded-params))
 
 (defun rest-url-string-extract-print ()
@@ -126,9 +134,16 @@
 (defun rest-url-string-reencode-region (s)
   "re-encode and create URL that has been extracted"
   ;; TODO: make this smarter
-  (setf s (replace-regexp-in-string (regexp-quote "\n") "&" s))
-  (setf s (replace-regexp-in-string "\\(&\\).*\\'" "?" s nil nil 1))
-  (replace-regexp-in-string "\\(&\\|\\?\\)$" "" s))
+  (setf elts (split-string "\n" s))
+  (setf params (rest-url-string-params-translate (cdr elts) nil))
+  (setf newparams "")
+  (dolist (param params)
+    (setf newparams (string newparams "&" param)))
+  (string (car elts) newparams))
+
+  ;; (setf s (replace-regexp-in-string (regexp-quote "\n") "&" s))
+  ;; (setf s (replace-regexp-in-string "\\(&\\).*\\'" "?" s nil nil 1))
+  ;; (replace-regexp-in-string "\\(&\\|\\?\\)$" "" s))
 
 (defun rest-url-string-reencode-region-print (begin end)
   "reconstruct/reencode a given region that has been split by extract-print"
