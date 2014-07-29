@@ -68,10 +68,10 @@
 
 (defconst rest-url-string-decode-strings
   '(("%20" " ") ("%3A" ":") ("%5B" "[") ("%5C" "\\") ("%5D" "]")
-    ("%3B" ";") ("%3C" "<") ("%3D" "=") ("%3E" ">") ("%3F" "?")
-    ("%2C" ",") ("%28" "(") ("%29" ")") ("%2A" "*") ("%2B" "+")
+    ("%3B" ";") ("%3C" "<") ("%3E" ">") ("%3F" "?")
+    ("%2C" ",") ("%2A" "*")  ("+" " ") ("%2B" "+")
     ("%7C" "|") ("%7D" "}") ("%7E" "~") ("%A2" "¢") ("%A3" "£")
-    ("%7B" "{") ("%22" "\"") ("+" " "))
+    ("%7B" "{") ("%22" "\""))
   "list of encodings and their decoded values")
 
 (defun rest-url-string-trim-string (s)
@@ -90,7 +90,9 @@
   (dolist (param params)
     (dolist (code rest-url-string-decode-strings param)
       ; decode every param
-      (setf param (replace-regexp-in-string (regexp-quote (funcall from code)) (funcall to code) param)))
+      (setf param (replace-regexp-in-string
+                   (regexp-quote (funcall from code)) (funcall to code)
+                   (rest-url-string-trim-string param))))
     (setf newparams (cons param newparams)))
   (nreverse newparams))
 
@@ -133,7 +135,8 @@
     (insert (car elts))
     (dolist (elt (second elts))
       (newline)
-      (insert elt))))
+      (insert elt))
+    (newline)))
 
 (defun rest-url-string-reencode (s)
   "re-encode and create URL that has been extracted"
@@ -152,14 +155,14 @@
   "reconstruct/reencode a given region that has been split by extract-print"
   (interactive "r")
   (save-excursion
-    (setf str (rest-url-string-reencode-region (buffer-substring-no-properties begin end)))
+    (setf str (rest-url-string-reencode (buffer-substring-no-properties begin end)))
     (move-beginning-of-line nil) (newline) (newline) (previous-line)
     (insert str) (newline)))
 
 (defun rest-url-string-http-get-print (begin end)
   "make http get call. works on single line and regions"
   (interactive "r")
-  (setf url (rest-url-string-reencode-region (buffer-substring-no-properties begin end)))
+  (setf url (rest-url-string-reencode (buffer-substring-no-properties begin end)))
   (setf response "")
   (with-current-buffer (url-retrieve-synchronously url)
     (progn
