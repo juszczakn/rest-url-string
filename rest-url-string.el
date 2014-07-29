@@ -24,7 +24,7 @@
 
 ;;; Code:
 
-; List of all possible encodings
+; List of all possible encodings. Might need later
 ;; '(("%09" "\t") ("%0A" "linefeed") ("%0D" "creturn") ("%20" " ")
 ;;   ("%22" "\"") ("%23" "#") ("%24" "$") ("%25" "%") ("%26" "&")
 ;;   ("%27" "'") ("%28" "(") ("%29" ")") ("%2A" "*") ("%2B" "+")
@@ -125,7 +125,7 @@
   (save-excursion
     (move-end-of-line nil)
     (setf elts (rest-url-string-extract-decode))
-    (newline)
+    (newline) (newline)
     (insert (car elts))
     (dolist (elt (second elts))
       (newline)
@@ -168,7 +168,7 @@
       (move-end-of-line nil) (newline 2)
       (insert response))))
 
-;; Test URL
+; Test URL
 ;http://www.acme.com/phonebook/UserDetails?firstName=John&lastName=Doe%20Mark
 
 (provide 'rest-url-string)
