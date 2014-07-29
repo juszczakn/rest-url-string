@@ -64,6 +64,8 @@
 
 (eval-when-compile (require 'cl))
 
+;;;###autoload
+
 (defconst rest-url-string-decode-strings
   '(("%20" " ") ("%3A" ":") ("%5B" "[") ("%5C" "\\") ("%5D" "]")
     ("%3B" ";") ("%3C" "<") ("%3D" "=") ("%3E" ">") ("%3F" "?")
