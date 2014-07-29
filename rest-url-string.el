@@ -135,17 +135,20 @@
       (newline)
       (insert elt))))
 
-(defun rest-url-string-reencode-region (s)
+(defun rest-url-string-reencode (s)
   "re-encode and create URL that has been extracted"
-  ;; TODO: make this smarter
-  (setf elts (split-string (rest-url-string-trim-string s) "\n"))
-  (setf params (rest-url-string-params-translate (cdr elts) nil))
-  (setf newparams "")
-  (dolist (param params)
-    (setf newparams (concatenate 'string newparams "&" param)))
-  (concatenate 'string (car elts) "?" (substring newparams 1)))
+  ; if not all on one line, recombine and parse
+  (if (string-match "\n" (rest-url-string-trim-string s))
+      (progn
+        (setf elts (split-string (rest-url-string-trim-string s) "\n"))
+        (setf params (rest-url-string-params-translate (cdr elts) nil))
+        (setf newparams "")
+        (dolist (param params)
+          (setf newparams (concatenate 'string newparams "&" param)))
+        (concatenate 'string (car elts) "?" (substring newparams 1)))
+    s))
 
-(defun rest-url-string-reencode-region-print (begin end)
+(defun rest-url-string-reencode-print (begin end)
   "reconstruct/reencode a given region that has been split by extract-print"
   (interactive "r")
   (save-excursion
@@ -153,18 +156,18 @@
     (move-beginning-of-line nil) (newline) (newline) (previous-line)
     (insert str) (newline)))
 
-(defun rest-url-string-http-get ()
-  "Make http get call with current lines URL"
-  (interactive)
-  (let ((url (buffer-substring (point-at-bol) (point-at-eol))))
-    (setf response "")
-    (with-current-buffer (url-retrieve-synchronously url)
-      (progn
-       (setf response (buffer-string))
-       (kill-buffer)))
-    (save-excursion
-      (move-end-of-line nil) (newline 2)
-      (insert response))))
+(defun rest-url-string-http-get-print (begin end)
+  "make http get call. works on single line and regions"
+  (interactive "r")
+  (setf url (rest-url-string-reencode-region (buffer-substring-no-properties begin end)))
+  (setf response "")
+  (with-current-buffer (url-retrieve-synchronously url)
+    (progn
+      (setf response (buffer-string))
+      (kill-buffer)))
+  (save-excursion
+    (move-end-of-line nil) (newline 2)
+    (insert response)))
 
 ; Test URL
 ;http://www.acme.com/phonebook/UserDetails?firstName=John&lastName=Doe%20Mark
