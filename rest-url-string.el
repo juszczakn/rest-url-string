@@ -62,6 +62,8 @@
 ;;   ("%F8" "ø") ("%F9" "ù") ("%FA" "ú") ("%FB" "û") ("%FC" "ü")
 ;;   ("%FD" "ý") ("%FE" "þ") ("%FF" "ÿ") ("%21" "!"))
 
+(eval-when-compile (require 'cl))
+
 (defconst rest-url-string-decode-strings
   '(("%20" " ") ("%3A" ":") ("%5B" "[") ("%5C" "\\") ("%5D" "]")
     ("%3B" ";") ("%3C" "<") ("%3D" "=") ("%3E" ">") ("%3F" "?")
@@ -84,9 +86,9 @@
   (setf from (if decode-p #'car #'second))
   (setf to (if decode-p #'second #'car))
   (dolist (param params)
-    (dolist (decode rest-url-string-decode-strings param)
+    (dolist (code rest-url-string-decode-strings param)
       ; decode every param
-      (setf param (replace-regexp-in-string (regexp-quote (funcall from decode)) (funcall to decode) param)))
+      (setf param (replace-regexp-in-string (regexp-quote (funcall from code)) (funcall to code) param)))
     (setf newparams (cons param newparams)))
   (nreverse newparams))
 
@@ -134,26 +136,20 @@
 (defun rest-url-string-reencode-region (s)
   "re-encode and create URL that has been extracted"
   ;; TODO: make this smarter
-  (setf elts (split-string "\n" s))
+  (setf elts (split-string (rest-url-string-trim-string s) "\n"))
   (setf params (rest-url-string-params-translate (cdr elts) nil))
   (setf newparams "")
   (dolist (param params)
-    (setf newparams (string newparams "&" param)))
-  (string (car elts) newparams))
-
-  ;; (setf s (replace-regexp-in-string (regexp-quote "\n") "&" s))
-  ;; (setf s (replace-regexp-in-string "\\(&\\).*\\'" "?" s nil nil 1))
-  ;; (replace-regexp-in-string "\\(&\\|\\?\\)$" "" s))
+    (setf newparams (concatenate 'string newparams "&" param)))
+  (concatenate 'string (car elts) "?" (substring newparams 1)))
 
 (defun rest-url-string-reencode-region-print (begin end)
   "reconstruct/reencode a given region that has been split by extract-print"
   (interactive "r")
   (save-excursion
     (setf str (rest-url-string-reencode-region (buffer-substring-no-properties begin end)))
-    (dolist (encode rest-url-string-decode-strings)
-      (setf str (replace-regexp-in-string (regexp-quote (second encode)) (car encode) str)))
-    (move-beginning-of-line nil) (newline) (previous-line)
-    (insert str)))
+    (move-beginning-of-line nil) (newline) (newline) (previous-line)
+    (insert str) (newline)))
 
 (defun rest-url-string-http-get ()
   "Make http get call with current lines URL"
