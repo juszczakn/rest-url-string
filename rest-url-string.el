@@ -1,3 +1,4 @@
+ ;;; -*- lexical-binding: t -*-
 ;;; rest-url-string.el --- For easy evaluation and printing of URL's using REST
 
 ;; Copyright (c) 2014 juszczakn
