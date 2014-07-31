@@ -170,6 +170,14 @@
 (defun rest-url-string-http-get-print (begin end)
   "make http get call. works on single line and regions"
   (interactive "r")
+  ; Check for one-liners
+  (unless (bolp)
+    (save-excursion
+      (move-beginning-of-line nil)
+      (let ((s (buffer-substring (point) end))
+            (reg "http://"))
+        (when (string-match reg s)
+          (setq begin (point))))))
   (setf url (rest-url-string-reencode
              (rest-url-string-trim-string
               (buffer-substring-no-properties begin end))))
