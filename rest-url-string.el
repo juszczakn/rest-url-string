@@ -171,13 +171,21 @@
   "make http get call. works on single line and regions"
   (interactive "r")
   ; Check for one-liners
-  (unless (bolp)
-    (save-excursion
-      (move-beginning-of-line nil)
-      (let ((s (buffer-substring (point) end))
-            (reg "http://"))
-        (when (string-match reg s)
-          (setq begin (point))))))
+  (save-excursion
+    (let ((s (buffer-substring begin end))
+          (regexp "http://"))
+      (unless (string-match regexp s)
+        (move-beginning-of-line nil)
+        (setq begin (point)))))
+  ; fix end if not called with a region (a single line)
+  (save-excursion
+    (when (= begin (point))
+      (forward-char (max 0 (- end begin 1))))
+    (let ((c (byte-to-string (following-char))))
+      (while (and (not (eobp)) (not (or (string= c "\n") (string= c " "))))
+        (forward-char)
+        (setq c (byte-to-string (following-char))))
+      (setq end (point))))
   (setf url (rest-url-string-reencode
              (rest-url-string-trim-string
               (buffer-substring-no-properties begin end))))
