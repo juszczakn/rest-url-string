@@ -64,8 +64,6 @@
 
 (eval-when-compile (require 'cl))
 
-;;;###autoload
-
 (defconst rest-url-string-decode-strings
   '(("%20" " ") ("%3A" ":") ("%5B" "[") ("%5C" "\\") ("%5D" "]")
     ("%3B" ";") ("%3C" "<") ("%3E" ">") ("%3F" "?")
@@ -88,12 +86,15 @@
   (setf from (if decode-p #'car #'second))
   (setf to (if decode-p #'second #'car))
   (dolist (param params)
-    (dolist (code rest-url-string-decode-strings param)
-      ; decode every param
-      (setf param (replace-regexp-in-string
-                   (regexp-quote (funcall from code)) (funcall to code)
-                   (rest-url-string-trim-string param))))
-    (setf newparams (cons param newparams)))
+    (setf param (rest-url-string-trim-string param))
+    (when (not (eq "" param))
+      (dolist (code rest-url-string-decode-strings param)
+        ; decode every param
+        (setf param (replace-regexp-in-string
+                     (regexp-quote (funcall from code))
+                     (funcall to code)
+                     param)))
+      (setf newparams (cons param newparams))))
   (nreverse newparams))
 
 (defun rest-url-string-extract ()
@@ -113,6 +114,22 @@
   (setf decoded-params (rest-url-string-params-translate (second url-list) t))
   (list (car url-list) decoded-params))
 
+
+(defun rest-url-string-reencode (s)
+  "re-encode and create URL that has been extracted"
+  ; if not all on one line, recombine and parse
+  (let ((s (rest-url-string-trim-string s)))
+    (if (string-match "\n" s)
+        (progn
+          (setf elts (split-string s "\n"))
+          (setf params (rest-url-string-params-translate (cdr elts) nil))
+          (setf newparams "")
+          (dolist (param params)
+            (setf newparams (concatenate 'string newparams "&" param)))
+          (concatenate 'string (car elts) "?" (substring newparams 1)))
+      s)))
+
+;;;###autoload
 (defun rest-url-string-extract-print ()
   "Extract URL and parameters, print them below the URL in the buffer"
   (interactive)
@@ -125,6 +142,7 @@
     (insert elt))
   (newline))
 
+;;;###autoload
 (defun rest-url-string-extract-decode-print ()
   "Extract URL and decode the parameters, print them below the URL in the buffer"
   (interactive)
@@ -138,37 +156,30 @@
       (insert elt))
     (newline)))
 
-(defun rest-url-string-reencode (s)
-  "re-encode and create URL that has been extracted"
-  ; if not all on one line, recombine and parse
-  (if (string-match "\n" (rest-url-string-trim-string s))
-      (progn
-        (setf elts (split-string (rest-url-string-trim-string s) "\n"))
-        (setf params (rest-url-string-params-translate (cdr elts) nil))
-        (setf newparams "")
-        (dolist (param params)
-          (setf newparams (concatenate 'string newparams "&" param)))
-        (concatenate 'string (car elts) "?" (substring newparams 1)))
-    s))
-
+;;;###autoload
 (defun rest-url-string-reencode-print (begin end)
   "reconstruct/reencode a given region that has been split by extract-print"
   (interactive "r")
   (save-excursion
+    (kill-region begin end) (yank)
     (setf str (rest-url-string-reencode (buffer-substring-no-properties begin end)))
     (move-beginning-of-line nil) (newline) (newline) (previous-line)
     (insert str) (newline)))
 
+;;;###autoload
 (defun rest-url-string-http-get-print (begin end)
   "make http get call. works on single line and regions"
   (interactive "r")
-  (setf url (rest-url-string-reencode (buffer-substring-no-properties begin end)))
+  (setf url (rest-url-string-reencode
+             (rest-url-string-trim-string
+              (buffer-substring-no-properties begin end))))
   (setf response "")
   (with-current-buffer (url-retrieve-synchronously url)
     (progn
       (setf response (buffer-string))
       (kill-buffer)))
   (save-excursion
+    (kill-region begin end) (yank)
     (move-end-of-line nil) (newline 2)
     (insert response)))
 
