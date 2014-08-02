@@ -115,7 +115,6 @@
   (setf decoded-params (rest-url-string-params-translate (second url-list) t))
   (list (car url-list) decoded-params))
 
-
 (defun rest-url-string-reencode (s)
   "re-encode and create URL that has been extracted"
   ; if not all on one line, recombine and parse
@@ -200,8 +199,8 @@
     (move-end-of-line nil) (newline 2)
     (insert response)))
 
-; Test URL
-;http://www.acme.com/phonebook/UserDetails?firstName=John&lastName=Doe%20Mark
+; Sanity Test URL
+;http://www.example.com/phonebook/UserDetails?firstName=John&lastName=Doe%20Smith
 
 (provide 'rest-url-string)
 ;;; rest-url-string.el ends here
